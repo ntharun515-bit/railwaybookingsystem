@@ -1,0 +1,29 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compiled
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+
+# Portable Maven (downloaded)
+apache-maven-3.9.6/
+
+# Env
+.env

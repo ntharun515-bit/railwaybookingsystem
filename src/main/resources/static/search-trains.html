@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Trains - RailConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html"><i class="fas fa-train me-2"></i>RailConnect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/search-trains.html">Search Trains</a></li>
+                </ul>
+                <ul class="navbar-nav" id="nav-auth"></ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="card shadow-lg mb-5">
+            <div class="card-body p-4">
+                <h3 class="mb-4"><i class="fas fa-search me-2 text-primary"></i>Search Trains</h3>
+                <form id="search-form" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">From Station</label>
+                        <select class="form-select" id="source" required>
+                            <option value="">-- Select Source --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">To Station</label>
+                        <select class="form-select" id="destination" required>
+                            <option value="">-- Select Destination --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Date of Journey</label>
+                        <input type="date" class="form-control" id="date" required>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100" style="height: 42px;"><i class="fas fa-search"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="results-container" class="d-none">
+            <h4 class="mb-3"><i class="fas fa-list me-2"></i>Available Trains</h4>
+            <div id="no-results" class="alert alert-warning d-none">No trains found for this route. Try different stations.</div>
+            <div class="row" id="train-list"></div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2026 RailConnect - Railway Ticket Booking System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+        // Set min date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').min = today;
+        document.getElementById('date').value = today;
+
+        // Load stations into dropdowns
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/stations`);
+                const stations = await response.json();
+                
+                const sourceSelect = document.getElementById('source');
+                const destSelect = document.getElementById('destination');
+                
+                stations.forEach(s => {
+                    const opt1 = new Option(`${s.stationName} (${s.stationCode})`, s.stationCode);
+                    const opt2 = new Option(`${s.stationName} (${s.stationCode})`, s.stationCode);
+                    sourceSelect.add(opt1);
+                    destSelect.add(opt2);
+                });
+            } catch(e) {
+                console.error('Failed to load stations', e);
+            }
+        });
+        
+        document.getElementById('search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const source = document.getElementById('source').value;
+            const dest = document.getElementById('destination').value;
+            const date = document.getElementById('date').value;
+
+            if (source === dest) {
+                alert('Source and destination cannot be the same!');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/trains/search?source=${source}&destination=${dest}`);
+                const trains = await response.json();
+                
+                const container = document.getElementById('results-container');
+                const list = document.getElementById('train-list');
+                const noResults = document.getElementById('no-results');
+                
+                container.classList.remove('d-none');
+                
+                if (!trains || trains.length === 0) {
+                    noResults.classList.remove('d-none');
+                    list.innerHTML = '';
+                    return;
+                }
+                
+                noResults.classList.add('d-none');
+                list.innerHTML = trains.map(t => `
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm border-0 border-start border-4 border-primary">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <h5 class="card-title fw-bold text-primary mb-0">${t.trainName}</h5>
+                                    <span class="badge bg-secondary">${t.trainType}</span>
+                                </div>
+                                <p class="text-muted mb-3">#${t.trainNumber}</p>
+                                <div class="row text-center mb-3">
+                                    <div class="col">
+                                        <h4 class="mb-0">${t.departureTime ? t.departureTime.substring(0,5) : '--:--'}</h4>
+                                        <small class="text-muted">${t.sourceStation ? t.sourceStation.stationCode : source}</small>
+                                    </div>
+                                    <div class="col d-flex align-items-center justify-content-center">
+                                        <div style="border-top: 2px dashed #ccc; width: 100%; position: relative;">
+                                            <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: white; padding: 0 5px; font-size: 0.8rem;">${t.duration || ''}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <h4 class="mb-0">${t.arrivalTime ? t.arrivalTime.substring(0,5) : '--:--'}</h4>
+                                        <small class="text-muted">${t.destinationStation ? t.destinationStation.stationCode : dest}</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <div>
+                                        <span class="fs-4 fw-bold text-success">₹${t.ticketFare}</span>
+                                        <small class="text-muted d-block"><i class="fas fa-chair me-1"></i>Available: <strong>${t.availableSeats}</strong></small>
+                                    </div>
+                                    <a href="/book-ticket.html?trainId=${t.id}&date=${date}" class="btn btn-primary ${t.availableSeats <= 0 ? 'disabled' : ''}">
+                                        ${t.availableSeats > 0 ? '<i class="fas fa-ticket-alt me-1"></i> Book Now' : 'Sold Out'}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (err) {
+                alert('Search failed: ' + err.message);
+            }
+        });
+    </script>
+</body>
+</html>
