@@ -1,0 +1,32 @@
+databases:
+  - name: railway-db
+    databaseName: railway_booking_db
+    user: railway_user
+    plan: free
+
+services:
+  - type: web
+    name: railway-booking-api
+    env: java
+    plan: free
+    buildCommand: "./mvnw clean package -DskipTests"
+    startCommand: "java -jar target/booking-0.0.1-SNAPSHOT.jar"
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DB_URL
+        fromDatabase:
+          name: railway-db
+          property: connectionString
+      - key: DB_USERNAME
+        fromDatabase:
+          name: railway-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: railway-db
+          property: password
+      - key: DB_DRIVER
+        value: org.postgresql.Driver
+      - key: DB_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
