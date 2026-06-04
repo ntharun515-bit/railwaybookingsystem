@@ -58,37 +58,69 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Seed Stations
-        if (stationRepository.count() == 0) {
-            Station ndls = createStation("NDLS", "New Delhi", "New Delhi", "Delhi");
-            Station mmct = createStation("MMCT", "Mumbai Central", "Mumbai", "Maharashtra");
-            Station csmt = createStation("CSMT", "Chhatrapati Shivaji Terminus", "Mumbai", "Maharashtra");
-            Station hwh = createStation("HWH", "Howrah Junction", "Kolkata", "West Bengal");
-            Station mas = createStation("MAS", "Chennai Central", "Chennai", "Tamil Nadu");
-            Station sbc = createStation("SBC", "KSR Bengaluru", "Bengaluru", "Karnataka");
-            Station jp = createStation("JP", "Jaipur Junction", "Jaipur", "Rajasthan");
-            Station adi = createStation("ADI", "Ahmedabad Junction", "Ahmedabad", "Gujarat");
-            Station lko = createStation("LKO", "Lucknow Charbagh", "Lucknow", "Uttar Pradesh");
-            Station pnbe = createStation("PNBE", "Patna Junction", "Patna", "Bihar");
+        Station ndls = getOrCreateStation("NDLS", "New Delhi", "New Delhi", "Delhi");
+        Station mmct = getOrCreateStation("MMCT", "Mumbai Central", "Mumbai", "Maharashtra");
+        Station csmt = getOrCreateStation("CSMT", "Chhatrapati Shivaji Terminus", "Mumbai", "Maharashtra");
+        Station hwh = getOrCreateStation("HWH", "Howrah Junction", "Kolkata", "West Bengal");
+        Station mas = getOrCreateStation("MAS", "Chennai Central", "Chennai", "Tamil Nadu");
+        Station sbc = getOrCreateStation("SBC", "KSR Bengaluru", "Bengaluru", "Karnataka");
+        Station jp = getOrCreateStation("JP", "Jaipur Junction", "Jaipur", "Rajasthan");
+        Station adi = getOrCreateStation("ADI", "Ahmedabad Junction", "Ahmedabad", "Gujarat");
+        Station lko = getOrCreateStation("LKO", "Lucknow Charbagh", "Lucknow", "Uttar Pradesh");
+        Station pnbe = getOrCreateStation("PNBE", "Patna Junction", "Patna", "Bihar");
 
-            // Seed Trains
-            if (trainRepository.count() == 0) {
-                createTrain("12952", "Mumbai Rajdhani", ndls, mmct, LocalTime.of(16, 55), LocalTime.of(8, 35), "15h 40m", 500, 2500.0, "Rajdhani");
-                createTrain("12951", "Mumbai Rajdhani Return", mmct, ndls, LocalTime.of(17, 40), LocalTime.of(8, 35), "14h 55m", 500, 2500.0, "Rajdhani");
-                createTrain("12301", "Howrah Rajdhani", ndls, hwh, LocalTime.of(16, 50), LocalTime.of(9, 55), "17h 5m", 600, 2800.0, "Rajdhani");
-                createTrain("12302", "Howrah Rajdhani Return", hwh, ndls, LocalTime.of(14, 5), LocalTime.of(10, 0), "19h 55m", 600, 2800.0, "Rajdhani");
-                createTrain("12621", "Tamil Nadu Express", ndls, mas, LocalTime.of(22, 30), LocalTime.of(7, 10), "32h 40m", 700, 1200.0, "Superfast");
-                createTrain("12622", "Tamil Nadu Express Return", mas, ndls, LocalTime.of(22, 0), LocalTime.of(6, 40), "32h 40m", 700, 1200.0, "Superfast");
-                createTrain("12627", "Karnataka Express", ndls, sbc, LocalTime.of(21, 15), LocalTime.of(6, 40), "33h 25m", 650, 1350.0, "Superfast");
-                createTrain("12431", "Trivandrum Rajdhani", ndls, mas, LocalTime.of(10, 55), LocalTime.of(5, 15), "42h 20m", 400, 3200.0, "Rajdhani");
-                createTrain("12903", "Golden Temple Mail", mmct, adi, LocalTime.of(21, 0), LocalTime.of(5, 30), "8h 30m", 500, 650.0, "Mail/Express");
-                createTrain("12309", "Rajdhani Express", ndls, jp, LocalTime.of(5, 40), LocalTime.of(10, 30), "4h 50m", 450, 900.0, "Rajdhani");
-                createTrain("12003", "Lucknow Shatabdi", ndls, lko, LocalTime.of(6, 10), LocalTime.of(12, 40), "6h 30m", 500, 1100.0, "Shatabdi");
-                createTrain("12004", "Lucknow Shatabdi Return", lko, ndls, LocalTime.of(15, 15), LocalTime.of(21, 45), "6h 30m", 500, 1100.0, "Shatabdi");
-                createTrain("12305", "Kolkata Rajdhani", ndls, hwh, LocalTime.of(17, 0), LocalTime.of(10, 10), "17h 10m", 550, 2650.0, "Rajdhani");
-                createTrain("22691", "Bengaluru Rajdhani", ndls, sbc, LocalTime.of(20, 50), LocalTime.of(6, 40), "33h 50m", 400, 3000.0, "Rajdhani");
-                createTrain("12839", "Chennai Mail", hwh, mas, LocalTime.of(23, 50), LocalTime.of(4, 35), "28h 45m", 600, 900.0, "Mail/Express");
-            }
-        }
+        // Seed Trains
+        createTrainIfNotExists("12952", "Mumbai Rajdhani", ndls, mmct, LocalTime.of(16, 55), LocalTime.of(8, 35), "15h 40m", 500, 2500.0, "Rajdhani");
+        createTrainIfNotExists("12951", "Mumbai Rajdhani Return", mmct, ndls, LocalTime.of(17, 40), LocalTime.of(8, 35), "14h 55m", 500, 2500.0, "Rajdhani");
+        createTrainIfNotExists("12301", "Howrah Rajdhani", ndls, hwh, LocalTime.of(16, 50), LocalTime.of(9, 55), "17h 5m", 600, 2800.0, "Rajdhani");
+        createTrainIfNotExists("12302", "Howrah Rajdhani Return", hwh, ndls, LocalTime.of(14, 5), LocalTime.of(10, 0), "19h 55m", 600, 2800.0, "Rajdhani");
+        createTrainIfNotExists("12621", "Tamil Nadu Express", ndls, mas, LocalTime.of(22, 30), LocalTime.of(7, 10), "32h 40m", 700, 1200.0, "Superfast");
+        createTrainIfNotExists("12622", "Tamil Nadu Express Return", mas, ndls, LocalTime.of(22, 0), LocalTime.of(6, 40), "32h 40m", 700, 1200.0, "Superfast");
+        createTrainIfNotExists("12627", "Karnataka Express", ndls, sbc, LocalTime.of(21, 15), LocalTime.of(6, 40), "33h 25m", 650, 1350.0, "Superfast");
+        createTrainIfNotExists("12431", "Trivandrum Rajdhani", ndls, mas, LocalTime.of(10, 55), LocalTime.of(5, 15), "42h 20m", 400, 3200.0, "Rajdhani");
+        createTrainIfNotExists("12903", "Golden Temple Mail", mmct, adi, LocalTime.of(21, 0), LocalTime.of(5, 30), "8h 30m", 500, 650.0, "Mail/Express");
+        createTrainIfNotExists("12309", "Rajdhani Express", ndls, jp, LocalTime.of(5, 40), LocalTime.of(10, 30), "4h 50m", 450, 900.0, "Rajdhani");
+        createTrainIfNotExists("12003", "Lucknow Shatabdi", ndls, lko, LocalTime.of(6, 10), LocalTime.of(12, 40), "6h 30m", 500, 1100.0, "Shatabdi");
+        createTrainIfNotExists("12004", "Lucknow Shatabdi Return", lko, ndls, LocalTime.of(15, 15), LocalTime.of(21, 45), "6h 30m", 500, 1100.0, "Shatabdi");
+        createTrainIfNotExists("12305", "Kolkata Rajdhani", ndls, hwh, LocalTime.of(17, 0), LocalTime.of(10, 10), "17h 10m", 550, 2650.0, "Rajdhani");
+        createTrainIfNotExists("22691", "Bengaluru Rajdhani", ndls, sbc, LocalTime.of(20, 50), LocalTime.of(6, 40), "33h 50m", 400, 3000.0, "Rajdhani");
+        createTrainIfNotExists("12839", "Chennai Mail", hwh, mas, LocalTime.of(23, 50), LocalTime.of(4, 35), "28h 45m", 600, 900.0, "Mail/Express");
+
+        // Returns for existing trains
+        createTrainIfNotExists("12628", "Karnataka Express Return", sbc, ndls, LocalTime.of(19, 20), LocalTime.of(4, 40), "33h 20m", 650, 1350.0, "Superfast");
+        createTrainIfNotExists("12432", "Trivandrum Rajdhani Return", mas, ndls, LocalTime.of(15, 30), LocalTime.of(9, 50), "42h 20m", 400, 3200.0, "Rajdhani");
+        createTrainIfNotExists("12904", "Golden Temple Mail Return", adi, mmct, LocalTime.of(22, 30), LocalTime.of(7, 0), "8h 30m", 500, 650.0, "Mail/Express");
+        createTrainIfNotExists("12310", "Rajdhani Express Return", jp, ndls, LocalTime.of(18, 0), LocalTime.of(22, 50), "4h 50m", 450, 900.0, "Rajdhani");
+        createTrainIfNotExists("12306", "Kolkata Rajdhani Return", hwh, ndls, LocalTime.of(16, 50), LocalTime.of(10, 0), "17h 10m", 550, 2650.0, "Rajdhani");
+        createTrainIfNotExists("22692", "Bengaluru Rajdhani Return", sbc, ndls, LocalTime.of(20, 0), LocalTime.of(5, 55), "33h 55m", 400, 3000.0, "Rajdhani");
+        createTrainIfNotExists("12840", "Chennai Mail Return", mas, hwh, LocalTime.of(23, 45), LocalTime.of(4, 30), "28h 45m", 600, 900.0, "Mail/Express");
+
+        // CSMT and PNBE routes
+        createTrainIfNotExists("12260", "CSMT Howrah Duronto", csmt, hwh, LocalTime.of(17, 15), LocalTime.of(16, 15), "23h 0m", 500, 2700.0, "Duronto");
+        createTrainIfNotExists("12259", "CSMT Howrah Duronto Return", hwh, csmt, LocalTime.of(16, 15), LocalTime.of(15, 15), "23h 0m", 500, 2700.0, "Duronto");
+        createTrainIfNotExists("12137", "Punjab Mail", csmt, ndls, LocalTime.of(19, 35), LocalTime.of(21, 50), "26h 15m", 700, 850.0, "Mail/Express");
+        createTrainIfNotExists("12138", "Punjab Mail Return", ndls, csmt, LocalTime.of(5, 15), LocalTime.of(7, 35), "26h 20m", 700, 850.0, "Mail/Express");
+        createTrainIfNotExists("12393", "Sampoorna Kranti Express", pnbe, ndls, LocalTime.of(19, 25), LocalTime.of(7, 55), "12h 30m", 800, 700.0, "Superfast");
+        createTrainIfNotExists("12394", "Sampoorna Kranti Express Return", ndls, pnbe, LocalTime.of(17, 30), LocalTime.of(6, 0), "12h 30m", 800, 700.0, "Superfast");
+        createTrainIfNotExists("12296", "Sanghamitra Express", pnbe, sbc, LocalTime.of(20, 15), LocalTime.of(17, 40), "45h 25m", 650, 1100.0, "Superfast");
+        createTrainIfNotExists("12295", "Sanghamitra Express Return", sbc, pnbe, LocalTime.of(9, 15), LocalTime.of(6, 40), "45h 25m", 650, 1100.0, "Superfast");
+
+        // Connecting routes
+        createTrainIfNotExists("12863", "Howrah Bengaluru Express", hwh, sbc, LocalTime.of(22, 55), LocalTime.of(6, 45), "31h 50m", 600, 950.0, "Superfast");
+        createTrainIfNotExists("12864", "Howrah Bengaluru Express Return", sbc, hwh, LocalTime.of(10, 35), LocalTime.of(18, 30), "31h 55m", 600, 950.0, "Superfast");
+        createTrainIfNotExists("12955", "Mumbai Jaipur Superfast", mmct, jp, LocalTime.of(18, 50), LocalTime.of(12, 45), "17h 55m", 600, 900.0, "Superfast");
+        createTrainIfNotExists("12956", "Mumbai Jaipur Superfast Return", jp, mmct, LocalTime.of(14, 0), LocalTime.of(7, 40), "17h 40m", 600, 900.0, "Superfast");
+        createTrainIfNotExists("14234", "Lucknow Patna Express", lko, pnbe, LocalTime.of(8, 30), LocalTime.of(16, 30), "8h 0m", 500, 450.0, "Mail/Express");
+        createTrainIfNotExists("14233", "Lucknow Patna Express Return", pnbe, lko, LocalTime.of(9, 45), LocalTime.of(17, 45), "8h 0m", 500, 450.0, "Mail/Express");
+        createTrainIfNotExists("12916", "Ashram Express", jp, adi, LocalTime.of(20, 25), LocalTime.of(5, 30), "9h 5m", 600, 600.0, "Superfast");
+        createTrainIfNotExists("12915", "Ashram Express Return", adi, jp, LocalTime.of(18, 30), LocalTime.of(3, 25), "8h 55m", 600, 600.0, "Superfast");
+        createTrainIfNotExists("12607", "Lalbagh Express", mas, sbc, LocalTime.of(15, 30), LocalTime.of(21, 35), "6h 5m", 500, 400.0, "Superfast");
+        createTrainIfNotExists("12608", "Lalbagh Express Return", sbc, mas, LocalTime.of(6, 20), LocalTime.of(12, 15), "5h 55m", 500, 400.0, "Superfast");
+    }
+
+    private Station getOrCreateStation(String code, String name, String city, String state) {
+        return stationRepository.findByStationCode(code)
+                .orElseGet(() -> createStation(code, name, city, state));
     }
 
     private Station createStation(String code, String name, String city, String state) {
@@ -98,6 +130,14 @@ public class DataInitializer implements CommandLineRunner {
         s.setCity(city);
         s.setState(state);
         return stationRepository.save(s);
+    }
+
+    private void createTrainIfNotExists(String number, String name, Station source, Station dest,
+                                        LocalTime departure, LocalTime arrival, String duration,
+                                        int seats, Double fare, String type) {
+        if (!trainRepository.existsByTrainNumber(number)) {
+            createTrain(number, name, source, dest, departure, arrival, duration, seats, fare, type);
+        }
     }
 
     private void createTrain(String number, String name, Station source, Station dest,
@@ -118,3 +158,4 @@ public class DataInitializer implements CommandLineRunner {
         trainRepository.save(t);
     }
 }
+

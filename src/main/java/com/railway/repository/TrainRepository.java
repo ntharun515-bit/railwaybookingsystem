@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface TrainRepository extends JpaRepository<Train, Long> {
     List<Train> findBySourceStationAndDestinationStation(Station sourceStation, Station destinationStation);
+    boolean existsByTrainNumber(String trainNumber);
 }
+
