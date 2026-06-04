@@ -17,6 +17,10 @@ import org.springframework.stereotype.Component;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Random;
+
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -116,7 +120,50 @@ public class DataInitializer implements CommandLineRunner {
         createTrainIfNotExists("12915", "Ashram Express Return", adi, jp, LocalTime.of(18, 30), LocalTime.of(3, 25), "8h 55m", 600, 600.0, "Superfast");
         createTrainIfNotExists("12607", "Lalbagh Express", mas, sbc, LocalTime.of(15, 30), LocalTime.of(21, 35), "6h 5m", 500, 400.0, "Superfast");
         createTrainIfNotExists("12608", "Lalbagh Express Return", sbc, mas, LocalTime.of(6, 20), LocalTime.of(12, 15), "5h 55m", 500, 400.0, "Superfast");
+
+        // Seed 500 programmatic trains
+        List<Station> stations = List.of(ndls, mmct, csmt, hwh, mas, sbc, jp, adi, lko, pnbe);
+        String[] trainTypes = {"Express", "Superfast", "Rajdhani", "Shatabdi", "Mail/Express", "Duronto"};
+        String[] prefixes = {"Humsafar", "Tejas", "Gatimaan", "Vande Bharat", "Garib Rath", "Jan Shatabdi", "Double Decker", "Yuva", "Antyodaya", "Uday"};
+        
+        Random rand = new Random(42); // deterministic random seed
+        
+        int generatedCount = 0;
+        while (generatedCount < 500) {
+            Station source = stations.get(rand.nextInt(stations.size()));
+            Station dest = stations.get(rand.nextInt(stations.size()));
+            if (source.equals(dest)) continue;
+            
+            // Deterministic train number (5 digits)
+            int num = 10000 + rand.nextInt(90000);
+            String trainNumber = String.valueOf(num);
+            
+            String type = trainTypes[rand.nextInt(trainTypes.length)];
+            String prefix = prefixes[rand.nextInt(prefixes.length)];
+            String name = source.getCity() + " - " + dest.getCity() + " " + prefix + " " + type;
+            
+            int depHour = rand.nextInt(24);
+            int depMin = rand.nextInt(12) * 5;
+            LocalTime departure = LocalTime.of(depHour, depMin);
+            
+            int durationHours = 2 + rand.nextInt(40);
+            int durationMins = rand.nextInt(12) * 5;
+            LocalTime arrival = departure.plusHours(durationHours).plusMinutes(durationMins);
+            String duration = durationHours + "h " + durationMins + "m";
+            
+            int seats = 100 + rand.nextInt(15) * 50;
+            double baseFare = 300.0 + rand.nextInt(40) * 50.0;
+            if ("Rajdhani".equals(type) || "Shatabdi".equals(type) || "Duronto".equals(type)) {
+                baseFare *= 1.8;
+            } else if ("Superfast".equals(type)) {
+                baseFare *= 1.2;
+            }
+            
+            createTrainIfNotExists(trainNumber, name, source, dest, departure, arrival, duration, seats, baseFare, type);
+            generatedCount++;
+        }
     }
+
 
     private Station getOrCreateStation(String code, String name, String city, String state) {
         return stationRepository.findByStationCode(code)
