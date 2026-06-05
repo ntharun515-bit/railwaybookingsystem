@@ -154,8 +154,8 @@
                                         <span class="fs-4 fw-bold text-success">₹${t.ticketFare}</span>
                                         <small class="text-muted d-block"><i class="fas fa-chair me-1"></i>Available: <strong>${t.availableSeats}</strong></small>
                                     </div>
-                                    <a href="/book-ticket.html?trainId=${t.id}&date=${date}" class="btn btn-primary ${t.availableSeats <= 0 ? 'disabled' : ''}">
-                                        ${t.availableSeats > 0 ? '<i class="fas fa-ticket-alt me-1"></i> Book Now' : 'Sold Out'}
+                                    <a href="/book-ticket.html?trainId=${t.id}&date=${date}" class="btn btn-primary ${t.availableSeats === 0 ? 'btn-danger' : ''}">
+                                        ${t.availableSeats > 0 ? '<i class="fas fa-ticket-alt me-1"></i> Book Now' : '<i class="fas fa-clock me-1"></i> View Waitlist'}
                                     </a>
                                 </div>
                             </div>
