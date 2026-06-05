@@ -45,10 +45,23 @@
                     </div>
                 </div>
 
+                <div class="card shadow-sm mb-4" id="seat-map-card" style="display:none;">
+                    <div class="card-header bg-white text-center">
+                        <h4 class="mb-0"><i class="fas fa-couch me-2 text-primary"></i>Interactive Seat Selection</h4>
+                        <small class="text-muted">Click on available seats to add passengers (Max 6)</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="coach-container">
+                            <div class="coach-aisle" id="coach-aisle">
+                                <!-- Generated seats go here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-white">
                         <h4 class="mb-0"><i class="fas fa-users me-2 text-primary"></i>Passenger Details</h4>
-                        <button class="btn btn-sm btn-outline-primary" onclick="addPassengerRow()"><i class="fas fa-plus me-1"></i>Add Passenger</button>
                     </div>
                     <div class="card-body">
                         <div id="passengers-container"></div>
@@ -124,6 +137,11 @@
                 
                 const src = currentTrain.sourceStation;
                 const dst = currentTrain.destinationStation;
+
+                if (currentTrain.availableSeats === 0) {
+                    renderWaitingListFull();
+                    return;
+                }
                 
                 document.getElementById('train-details-container').innerHTML = `
                     <div class="d-flex justify-content-between align-items-start mb-3">
@@ -160,7 +178,12 @@
                     </div>
                 `;
                 
-                addPassengerRow();
+                // Don't auto-add passenger row, let them click seats
+                document.getElementById('passengers-container').innerHTML = '';
+                document.getElementById('seat-map-card').style.display = 'block';
+                
+                // Generate Seat Map
+                generateSeatMap(currentTrain.availableSeats, Math.min(60, currentTrain.totalSeats));
                 updateFare();
                 
             } catch (err) {
@@ -170,7 +193,81 @@
             }
         });
 
-        function addPassengerRow() {
+        function renderWaitingListFull() {
+            document.getElementById('booking-content').innerHTML = `
+                <div class="col-12">
+                    <div class="waiting-list-full">
+                        <div class="waiting-list-content">
+                            <div class="train-departing-animation"><i class="fas fa-train"></i>💨</div>
+                            <h2 class="waiting-list-title">Waiting List Full</h2>
+                            <p class="waiting-list-text">Oh no! This train is fully packed and even the waiting list has reached its limit.<br>Please search for alternative trains or different dates.</p>
+                            <a href="/search-trains.html" class="btn btn-primary btn-lg mt-4 px-5">Search Alternatives</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let selectedSeats = [];
+
+        function generateSeatMap(available, total) {
+            const aisle = document.getElementById('coach-aisle');
+            aisle.innerHTML = '';
+            // Display maximum 60 visual seats in UI for aesthetic, randomly mark some as booked
+            const visualSeats = Math.min(60, total);
+            const bookedVisual = visualSeats - Math.min(visualSeats, available);
+            
+            // Generate seats
+            for (let i = 1; i <= visualSeats; i++) {
+                const isBooked = i <= bookedVisual; // Simple logic: first 'bookedVisual' seats are taken
+                
+                // create seat
+                const seatDiv = document.createElement('div');
+                seatDiv.className = \`seat \${isBooked ? 'booked' : 'available'}\`;
+                seatDiv.textContent = i;
+                seatDiv.dataset.seatNum = i;
+                
+                if (!isBooked) {
+                    seatDiv.onclick = () => toggleSeat(seatDiv);
+                }
+                
+                aisle.appendChild(seatDiv);
+                
+                // Add aisle gap every 2 seats
+                if (i % 2 === 0 && i % 4 !== 0) {
+                    const gap = document.createElement('div');
+                    gap.className = 'aisle-space';
+                    aisle.appendChild(gap);
+                }
+            }
+        }
+
+        function toggleSeat(seatDiv) {
+            const seatNum = seatDiv.dataset.seatNum;
+            if (seatDiv.classList.contains('selected')) {
+                // Deselect
+                seatDiv.classList.remove('selected');
+                selectedSeats = selectedSeats.filter(s => s !== seatNum);
+                // Remove last passenger row
+                const rows = document.querySelectorAll('.passenger-row');
+                if(rows.length > 0) {
+                    rows[rows.length - 1].remove();
+                    passengerCount--;
+                }
+            } else {
+                // Select
+                if (selectedSeats.length >= 6) {
+                    alert('Maximum 6 passengers allowed per booking');
+                    return;
+                }
+                seatDiv.classList.add('selected');
+                selectedSeats.push(seatNum);
+                addPassengerRow(seatNum);
+            }
+            updateFare();
+        }
+
+        function addPassengerRow(seatNum = null) {
             if(passengerCount >= 6) {
                 alert('Maximum 6 passengers allowed per booking');
                 return;
@@ -180,8 +277,12 @@
             const idx = passengerCount;
             const div = document.createElement('div');
             div.className = 'row g-3 mb-3 passenger-row p-2 bg-light rounded';
+            div.dataset.seatNum = seatNum;
             div.innerHTML = `
-                <div class="col-12 mb-1"><strong>Passenger ${idx}</strong></div>
+                <div class="col-12 mb-1 d-flex justify-content-between">
+                    <strong>Passenger ${idx} ${seatNum ? \`(Seat: \${seatNum})\` : ''}</strong>
+                    <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2" onclick="removePassenger(this, '\${seatNum}')"><i class="fas fa-times"></i></button>
+                </div>
                 <div class="col-md-4">
                     <input type="text" class="form-control pax-name" placeholder="Full Name" required>
                 </div>
@@ -196,7 +297,7 @@
                         <option value="O">Other</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <select class="form-select pax-pref">
                         <option value="NONE">No Pref</option>
                         <option value="LB">Lower Berth</option>
@@ -206,17 +307,29 @@
                         <option value="SUB">Side Upper</option>
                     </select>
                 </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    ${passengerCount > 1 ? `<button type="button" class="btn btn-outline-danger btn-sm" onclick="removePassenger(this)"><i class="fas fa-trash"></i></button>` : ''}
-                </div>
             `;
             document.getElementById('passengers-container').appendChild(div);
             updateFare();
         }
 
-        function removePassenger(btn) {
+        function removePassenger(btn, seatNum) {
             btn.closest('.passenger-row').remove();
             passengerCount--;
+            
+            // Also unselect the seat map
+            if (seatNum) {
+                const seatDiv = document.querySelector(\`.seat[data-seat-num="\${seatNum}"]\`);
+                if (seatDiv) seatDiv.classList.remove('selected');
+                selectedSeats = selectedSeats.filter(s => s !== seatNum);
+            }
+            
+            // Re-index passenger labels
+            const rows = document.querySelectorAll('.passenger-row');
+            rows.forEach((row, index) => {
+                const sNum = row.dataset.seatNum;
+                row.querySelector('strong').innerHTML = \`Passenger \${index + 1} \${sNum ? \`(Seat: \${sNum})\` : ''}\`;
+            });
+            
             updateFare();
         }
 
