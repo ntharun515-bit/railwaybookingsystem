@@ -223,7 +223,7 @@
                 
                 // create seat
                 const seatDiv = document.createElement('div');
-                seatDiv.className = \`seat \${isBooked ? 'booked' : 'available'}\`;
+                seatDiv.className = `seat ${isBooked ? 'booked' : 'available'}`;
                 seatDiv.textContent = i;
                 seatDiv.dataset.seatNum = i;
                 
@@ -280,8 +280,8 @@
             div.dataset.seatNum = seatNum;
             div.innerHTML = `
                 <div class="col-12 mb-1 d-flex justify-content-between">
-                    <strong>Passenger ${idx} ${seatNum ? \`(Seat: \${seatNum})\` : ''}</strong>
-                    <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2" onclick="removePassenger(this, '\${seatNum}')"><i class="fas fa-times"></i></button>
+                    <strong>Passenger ${idx} ${seatNum ? `(Seat: ${seatNum})` : ''}</strong>
+                    <button type="button" class="btn btn-outline-danger btn-sm py-0 px-2" onclick="removePassenger(this, '${seatNum}')"><i class="fas fa-times"></i></button>
                 </div>
                 <div class="col-md-4">
                     <input type="text" class="form-control pax-name" placeholder="Full Name" required>
@@ -318,7 +318,7 @@
             
             // Also unselect the seat map
             if (seatNum) {
-                const seatDiv = document.querySelector(\`.seat[data-seat-num="\${seatNum}"]\`);
+                const seatDiv = document.querySelector(`.seat[data-seat-num="${seatNum}"]`);
                 if (seatDiv) seatDiv.classList.remove('selected');
                 selectedSeats = selectedSeats.filter(s => s !== seatNum);
             }
@@ -327,7 +327,7 @@
             const rows = document.querySelectorAll('.passenger-row');
             rows.forEach((row, index) => {
                 const sNum = row.dataset.seatNum;
-                row.querySelector('strong').innerHTML = \`Passenger \${index + 1} \${sNum ? \`(Seat: \${sNum})\` : ''}\`;
+                row.querySelector('strong').innerHTML = `Passenger ${index + 1} ${sNum ? `(Seat: ${sNum})` : ''}`;
             });
             
             updateFare();
